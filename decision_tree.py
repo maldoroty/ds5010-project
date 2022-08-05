@@ -3,16 +3,14 @@ DS5010 Decision Tree Project
 '''
 
 import pandas as pd
+import numpy as np
 
 class Node:
     
-    def __init__(self, data, left = None, right = None):
-        self.data = data
+    def __init__(self, category = None, split_value = None, left = None, right = None, gini_index = None, label = None):
+        self.category = category
+        self.split_value = split_value
         self.left = left
         self.right = right
-    
-    def get_data(self):
-        return self.data
-
-    def set_data(self, data):
-        self.data = data
+        self.gini_index = gini_index
+        self.label = label
