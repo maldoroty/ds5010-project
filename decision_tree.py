@@ -1,8 +1,6 @@
 '''
 DS5010 Decision Tree Project
 '''
-
-from logging import root
 import pandas as pd
 import numpy as np
 
