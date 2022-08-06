@@ -2,39 +2,46 @@
 DS5010 Decision Tree Project
 '''
 
+from logging import root
 import pandas as pd
 import numpy as np
 
 class Node:
     
-    def __init__(self, category = None, split_value = None, left = None, right = None, gini_index = None, label = None):
-        self.category = category
-        self.split_value = split_value
+    def __init__(self, feature = None, threshold = None, left = None, right = None, label = None):
+        '''initializing all the variables needed for a decision node and leaf node'''
+        self.feature = feature
+        self.threshold = threshold
         self.left = left
         self.right = right
-        self.gini_index = gini_index
         self.label = label
+
+    def leaf(self):
+        '''check to see if a leaf node was reached'''
+        if self.label != None:
+            return True
 
 class DecisionTree:
 
-    def __init__(self):
-        pass
-
-    def build_tree(self, data):
-        
-        diff_labels = np.df['labels'].nunique()
-        if diff_labels > 1:
-            best_split = self.best_split(data)
-            left, right = self.build_tree.split(data)
-            return Node(best_split["category"], best_split["split_value"], left, right, best_split["gini_index"])
-        
-        return Node(label = self.count_leaf(data))
-
-    def best_split(data):
-        pass
-
-    def split(data):
-        pass
+    def __init__(self, min_split = 2, max_depth = None, total_features = None):
+        '''initiliazing variables that control the decision tree builder'''
+        self.root = None
+        self.min_split = min_split
+        max_depth = max_depth
     
-    def count_leaf(data):
-        pass
+    def start_tree(self, data, col_labels):
+        '''starting the tree at the root'''
+        self.total_features = data.shape[1]
+        self.root = self.build_tree(data, col_labels)
+    
+    def build_tree(self, data, col, depth):
+        '''building the tree'''
+        samples, features = np.shape(data)
+        diff_labels = np.df['labels'].nunique()
+        # stopping condition
+        if diff_labels <= 1 or depth >= self.max_depth:
+            return Node(label = self.count_leaf(data))
+        # need to add traversal of each column element to find best information gain to build tree recurisvely
+        
+    def count_leaf(self, col_labels):
+        return max(list(col_labels), key = col_labels.count)
