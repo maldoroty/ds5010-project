@@ -1,7 +1,6 @@
 '''
 DS5010 Decision Tree Project
 '''
-from pyexpat import features
 import pandas as pd
 import numpy as np
 from collections import Counter
