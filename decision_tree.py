@@ -42,6 +42,13 @@ class DecisionTree:
         if diff_labels <= 1 or depth >= self.max_depth:
             return Node(label = self.count_leaf(data))
         # need to add traversal of each column element to find best information gain to build tree recurisvely
-        
+        best_split = self.best_split(data, col)
+        # need to split the data here
+        # return decision node from dictionary best_split to fill out arguments
+        return Node()
+    
+    def best_split(data, col):
+        pass
+
     def count_leaf(self, col_labels):
         return max(list(col_labels), key = col_labels.count)
