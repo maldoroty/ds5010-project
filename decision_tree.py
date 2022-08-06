@@ -1,6 +1,7 @@
 '''
 DS5010 Decision Tree Project
 '''
+from pyexpat import features
 import pandas as pd
 import numpy as np
 from collections import Counter
@@ -42,10 +43,13 @@ class DecisionTree:
         # need to add traversal of each column element to find best information gain to build tree recurisvely
         best_split = self.best_split(data, col_labels)
         # need to split the data here
-        # return decision node from dictionary best_split to fill out arguments
+        # return decision node from best_split to fill out arguments
         return Node()
     
     def best_split(self, data, col):
+        pass
+    
+    def split(self, data, index, threshold):
         pass
 
     def count_leaf(self, col_labels):
