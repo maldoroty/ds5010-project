@@ -99,8 +99,7 @@ def gini_impurity_pd(label_subsets: pd.Series) -> float:
 def split(dataframe: pd.DataFrame, col_name, threshold):
     '''split the dataframe based on the threshold in a column'''
     return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold]
-<<<<<<< HEAD
-=======
+
 def get_counts():
     """
         getting the counts of the labels in the dataset, then creating a dict
@@ -153,9 +152,6 @@ def weighted_gini_impurity(left, right):
                     (right_gini * (len(right_gini) / (len(left_gini) + (len(right_gini)))))
 
     return weighted_gini
-
-
->>>>>>> 8b4df0fd46e366ccbdc4944d6ff793f777aa09f5
 
 if __name__ == "__main__":
     # example of how this needs to be set up
