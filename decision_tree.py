@@ -96,6 +96,10 @@ def gini_impurity_pd(label_subsets: pd.Series) -> float:
     sum_freq = sum(squared_freq)
     return 1 - sum_freq
 
+def split(dataframe: pd.DataFrame, col_name, threshold):
+    '''split the dataframe based on the threshold in a column'''
+    return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold]
+
 if __name__ == "__main__":
     # example of how this needs to be set up
     col_names = ["color", "diameter", "labels"]
