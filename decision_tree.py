@@ -99,6 +99,63 @@ def gini_impurity_pd(label_subsets: pd.Series) -> float:
 def split(dataframe: pd.DataFrame, col_name, threshold):
     '''split the dataframe based on the threshold in a column'''
     return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold]
+<<<<<<< HEAD
+=======
+def get_counts():
+    """
+        getting the counts of the labels in the dataset, then creating a dict
+        with the label with it's count
+    """
+    # create a list of labels without duplicates
+    unique_rows = list(set(self.df.iloc[:,0]))
+
+    # rename dicts
+    dicts = {}
+    
+    for items in unique_rows:
+        # making a list of the counts of the labels, will be the values
+        counts = self.df[items].value_counts()
+        # make dictionary with labels (keys) and their counts (values)
+        dicts[i] = counts
+
+    return dicts
+
+def gini_imp(classes):
+    """
+        performing gini formula on data set, returning the gini impurity
+    """
+    # find total number of rows in dataset
+    total_outcomes = len(classes)
+    dicts = get_counts()
+    gini_imp = 1
+
+    #perform gini calculation
+    for i in dicts:
+        values = dicts[i]
+        p = values / total_outcomes
+        gini = p^2
+        gini_imp -= gini
+        
+    return gini_imp
+
+def weighted_gini_impurity(left, right):
+    """
+        finding weighted gini value, returning the weighted gini impurity
+    """
+    #gini from left node
+    left_gini = gini_imp(left[0])
+
+    #gini from right node
+    right_gini = gini_imp(right[0])
+
+    # weighted gini impurity
+    weighted_gini = (left_gini * (len(left_gini) / (len(left_gini) + (len(right_gini))))) + \
+                    (right_gini * (len(right_gini) / (len(left_gini) + (len(right_gini)))))
+
+    return weighted_gini
+
+
+>>>>>>> 8b4df0fd46e366ccbdc4944d6ff793f777aa09f5
 
 if __name__ == "__main__":
     # example of how this needs to be set up
