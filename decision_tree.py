@@ -3,7 +3,6 @@ DS5010 Decision Tree Project
 '''
 import pandas as pd
 import numpy as np
-from collections import Counter
 
 class Node:
     
@@ -15,39 +14,24 @@ class Node:
         self.right = right
         self.label = label
 
-    def leaf(self):
-        '''check to see if a leaf node was reached'''
-        if self.label != None:
-            return True
-
 class DecisionTree:
 
-    def __init__(self, min_split = 2, max_depth = 10, total_features = None):
+    def __init__(self, max_depth = 10):
         '''initiliazing variables that control the decision tree builder'''
-        self.root = None
-        self.min_split = min_split
         self.max_depth = max_depth
     
-    def start_tree(self, data, col_labels):
-        '''starting the tree at the root'''
-        self.root = self.build_tree(data, col_labels)
+    def build_tree(self, dataframe, labels, is_numerical, depth = 0):
+        """building the tree recursively"""
+        if len(dataframe) == 0:
+            return None
+        if labels.nunique() == 1 or depth >= self.max_depth:
+            return Node(label = labels.mode())
+        feature, threshold = best_split_df(dataframe, labels, is_numerical)
+        left, right, left_labels, right_labels = split(dataframe, feature, threshold, labels, is_numerical)
+        left_node = self.build_tree(left, left_labels, is_numerical, depth + 1)
+        right_node = self.build_tree(right, right_labels, is_numerical, depth + 1)
+        return Node(feature, threshold, left_node, right_node)
     
-    def build_tree(self, data, col_labels, depth = 0):
-        '''building the tree'''
-        samples, features = data.shape()
-        diff_labels = df['labels'].nunique()
-        # stopping condition
-        if diff_labels <= 1 or depth >= self.max_depth:
-            return Node(label = self.count_leaf(data))
-        # need to add traversal of each column element to find best information gain to build tree recurisvely
-        best_split = self.best_split(data, col_labels)
-        # need to split the data here
-        # return decision node from best_split to fill out arguments
-        return Node()
-
-    def count_leaf(self, col_labels):
-        count = Counter(col_labels)
-        return count.most_common(1)[0][0]
 
 def best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
     """looping through each column of the dataframe"""
@@ -96,13 +80,13 @@ def gini_impurity_pd(label_subsets: pd.Series) -> float:
     sum_freq = sum(squared_freq)
     return 1 - sum_freq
 
-def split(dataframe: pd.DataFrame, col_name, threshold, is_numerical):
+def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
     '''split the dataframe based on the threshold in a column'''
-    col_names = dataframe.columns
+    col_names = list(dataframe.columns)
     idx = col_names.index(col_name)
     if is_numerical[idx]:
-        return dataframe[dataframe[col_name] <= threshold], dataframe[dataframe[col_name] > threshold]
-    return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold]
+        return dataframe[dataframe[col_name] <= threshold], dataframe[dataframe[col_name] > threshold], labels[dataframe[col_name] <= threshold], labels[dataframe[col_name] > threshold]
+    return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold], labels[dataframe[col_name] == threshold], labels[dataframe[col_name] != threshold]
 
 def get_counts():
     """
@@ -165,4 +149,5 @@ if __name__ == "__main__":
     df = df.drop(columns = "labels")
     # user must specifiy the pd.Series for is_numerical and here the slice eliminates the label column of fruits.csv
     is_numerical = pd.Series([False, True], col_names[:2])
-    print(best_split_df(df, labels, is_numerical))
+    #print(best_split_df(df, labels, is_numerical))
+ 
