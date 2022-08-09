@@ -71,6 +71,7 @@ def best_split_col(data: pd.Series, labels: pd.Series, is_numerical: bool):
             threshold = value
     return threshold, impurity
 
+
 def gini_impurity_pd(label_subsets: pd.Series) -> float:
     '''fine gini impurity'''
     # get the relative frequencies of the label_subsets
@@ -87,6 +88,9 @@ def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
     if is_numerical[idx]:
         return dataframe[dataframe[col_name] <= threshold], dataframe[dataframe[col_name] > threshold], labels[dataframe[col_name] <= threshold], labels[dataframe[col_name] > threshold]
     return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold], labels[dataframe[col_name] == threshold], labels[dataframe[col_name] != threshold]
+
+
+    
 
 def get_counts():
     """
@@ -120,7 +124,7 @@ def gini_imp(classes):
     for i in dicts:
         values = dicts[i]
         p = values / total_outcomes
-        gini = p^2
+        gini = p ** 2
         gini_imp -= gini
         
     return gini_imp
@@ -130,10 +134,10 @@ def weighted_gini_impurity(left, right):
         finding weighted gini value, returning the weighted gini impurity
     """
     #gini from left node
-    left_gini = gini_imp(left[0])
+    left_gini = gini_imp(left)
 
     #gini from right node
-    right_gini = gini_imp(right[0])
+    right_gini = gini_imp(right)
 
     # weighted gini impurity
     weighted_gini = (left_gini * (len(left_gini) / (len(left_gini) + (len(right_gini))))) + \
