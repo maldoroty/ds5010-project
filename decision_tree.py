@@ -25,7 +25,7 @@ class DecisionTree:
         if len(dataframe) == 0:
             return None
         if labels.nunique() == 1 or depth >= self.max_depth:
-            return Node(label = labels.mode())
+            return Node(label = labels.mode()[0])
         feature, threshold = best_split_df(dataframe, labels, is_numerical)
         left, right, left_labels, right_labels = split(dataframe, feature, threshold, labels, is_numerical)
         left_node = self.build_tree(left, left_labels, is_numerical, depth + 1)
