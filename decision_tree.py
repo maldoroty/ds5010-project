@@ -31,7 +31,21 @@ class DecisionTree:
         left_node = self.build_tree(left, left_labels, is_numerical, depth + 1)
         right_node = self.build_tree(right, right_labels, is_numerical, depth + 1)
         return Node(feature, threshold, left_node, right_node)
-        
+
+def predict(node, input_data):
+    """ prediction method"""
+
+    if node.label not None:
+        return node.label
+
+    else:
+        if input_data.loc[node.feature] < node.threshold:
+            return predict(node.left, input_data)
+
+        else:
+            return predict(node.right, input_data)
+
+    
 
 def best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
     """looping through each column of the dataframe"""
@@ -96,22 +110,7 @@ def build_dt(dataframe: pd.DataFrame, node, labels, is_numerical, depth, col_nam
     built_tree = DecisionTree(max_depth)
     built_tree.build_tree(dataframe, labels, is_numerical, 1)
 
-def predict(node, label):
-    """ prediction method"""
-
-    # needs to be fixed and made consistent with current variables
-    """
-    if node[value] > label[node[keys]]:
-        if is_instance(left_node, dict):
-            return predict(left_node, label)
-        else:
-            return left_node
-    else:
-        if isinstance(right_node, dict):
-            return predict(right_node, label)
-        else:
-            return right_node
-    """  
+  
 
 def get_counts():
     """
