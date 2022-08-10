@@ -148,11 +148,30 @@ def weighted_gini_impurity(left, right):
 
     return weighted_gini
 
+TREE_SPACE = "   "
+
+def print_tree_helper(node):
+    if node.label is not None:
+        tree = "<Leaf, Label = " + node.label + ">"
+    else:
+        tree = "<Node, Threshold = " + node.threshold
+        tree += ", Features = " + node.feature + ">\n"
+
+        tree += TREE_SPACE + TREE_SPACE + print_tree(node.left) + "\n"
+        tree += TREE_SPACE + TREE_SPACE + print_tree(node.right)
+
+    return tree
+
+def print_tree(node):
+    return print_tree_helper(node)
+    
+
 if __name__ == "__main__":
     # example of how this needs to be set up
     col_names = ["color", "diameter", "labels"]
     df = pd.read_csv("fruits.csv", skiprows=1, header=None, names=col_names)
     labels = df.labels
+    print(df)
     df = df.drop(columns = "labels")
     # user must specifiy the pd.Series for is_numerical and here the slice eliminates the label column of fruits.csv
     is_numerical = pd.Series([False, True], col_names[:2])
@@ -163,7 +182,10 @@ if __name__ == "__main__":
 
     
 
-    #tree = DecisionTree()
-    #node = tree.build_tree(df, labels, is_numerical)
-    #print(predict(node.feature, df))
+    tree = DecisionTree()
+    node = tree.build_tree(df, labels, is_numerical)
+    print(print_tree(node))
+    # print(predict(node, df))
+
+    
  
