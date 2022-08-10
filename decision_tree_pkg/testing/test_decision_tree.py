@@ -15,7 +15,9 @@ class TestDecisionTree(unittest.TestCase):
         df = df.drop(columns = "labels")
         is_numerical = pd.Series([False, True], col_names[:2])
         x = DecisionTree().build_tree(df, labels, is_numerical)
-        self.assertEqual(x, x)
+        left_node = Node(feature = None, threshold = None, left = None, right = None, label = "Apple")
+        right_node = Node(feature = None, threshold = None, left = None, right = None, label = "Grape")
+        self.assertEqual(Node(feature = "color", threshold = "Red", left = left_node, right = right_node), x)
 
 if __name__ == "__main__":
     unittest.main(verbosity=3)

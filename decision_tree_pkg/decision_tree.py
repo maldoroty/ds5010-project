@@ -31,6 +31,10 @@ class DecisionTree:
         left_node = self.build_tree(left, left_labels, is_numerical, depth + 1)
         right_node = self.build_tree(right, right_labels, is_numerical, depth + 1)
         return Node(feature, threshold, left_node, right_node)
+    
+    def __eq__(self, other):
+        return self.feature == other.feature and self.threshold == other.threshold and self.left == other.left \
+        and self.right == other.right and self.label == other.label
 
 def predict(node, input_data):
     """ prediction method"""
@@ -103,8 +107,10 @@ def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
     col_names = list(dataframe.columns)
     idx = col_names.index(col_name)
     if is_numerical[idx]:
-        return dataframe[dataframe[col_name] <= threshold], dataframe[dataframe[col_name] > threshold], labels[dataframe[col_name] <= threshold], labels[dataframe[col_name] > threshold]
-    return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold], labels[dataframe[col_name] == threshold], labels[dataframe[col_name] != threshold]
+        return dataframe[dataframe[col_name] <= threshold], dataframe[dataframe[col_name] > threshold], \
+            labels[dataframe[col_name] <= threshold], labels[dataframe[col_name] > threshold]
+    return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold], \
+        labels[dataframe[col_name] == threshold], labels[dataframe[col_name] != threshold]
 
 
 def build_dt(dataframe: pd.DataFrame, node, labels, is_numerical, depth, col_name, threshold):
