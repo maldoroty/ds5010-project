@@ -13,6 +13,22 @@ class Node:
         self.left = left
         self.right = right
         self.label = label
+    
+    def __str__(self):
+        TREE_SPACE = "   "
+        if self.label is not None:
+            tree = "<Leaf, Label = " + self.label + ">"
+        else:
+            tree = "<Node, Threshold = " + self.threshold
+            tree += ", Features = " + self.feature + ">\n"
+
+            tree += TREE_SPACE + TREE_SPACE + self.left.print_tree() + "\n"
+            tree += TREE_SPACE + TREE_SPACE + self.right.print_tree()
+
+        return tree
+    
+    def print_tree(self):
+        return self.__str__()
 
 class DecisionTree:
 
@@ -153,25 +169,7 @@ def weighted_gini_impurity(left, right):
                     (right_gini * (len(right) / (len(left) + (len(right)))))
 
     return weighted_gini
-
-TREE_SPACE = "   "
-
-def print_tree_helper(node):
-    if node.label is not None:
-        tree = "<Leaf, Label = " + node.label + ">"
-    else:
-        tree = "<Node, Threshold = " + node.threshold
-        tree += ", Features = " + node.feature + ">\n"
-
-        tree += TREE_SPACE + TREE_SPACE + print_tree(node.left) + "\n"
-        tree += TREE_SPACE + TREE_SPACE + print_tree(node.right)
-
-    return tree
-
-def print_tree(node):
-    return print_tree_helper(node)
     
-
 if __name__ == "__main__":
     # example of how this needs to be set up
     col_names = ["color", "diameter", "labels"]
@@ -190,7 +188,7 @@ if __name__ == "__main__":
 
     tree = DecisionTree()
     node = tree.build_tree(df, labels, is_numerical)
-    print(print_tree(node))
+    print(node)
     # print(predict(node, df))
 
     
