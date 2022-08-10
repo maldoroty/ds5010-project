@@ -35,16 +35,13 @@ class DecisionTree:
 def predict(node, input_data):
     """ prediction method"""
 
-    if node.label not None:
+    if node.label is not None:
         return node.label
-
     else:
         if input_data.loc[node.feature] < node.threshold:
             return predict(node.left, input_data)
-
         else:
             return predict(node.right, input_data)
-
     
 
 def best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
@@ -75,10 +72,16 @@ def best_split_col(data: pd.Series, labels: pd.Series, is_numerical: bool):
             left_labels = labels[data <= value]
             right_labels = labels[data > value]
         # calculate left and right impurity
-        left_impurity = gini_impurity_pd(left_labels)
-        right_impurity = gini_impurity_pd(right_labels)
+        
+        #left_impurity = gini_impurity_pd(left_labels)
+        
+        #right_impurity = gini_impurity_pd(right_labels)
+        
         # calculate weighted impurity
-        weighted_impurity = count * left_impurity + (1 - count) * right_impurity
+        #weighted_impurity = count * left_impurity + (1 - count) * right_impurity
+
+        weighted_impurity = weighted_gini_impurity(left_labels, right_labels)
+        
         # save the best weighted impurity and threshold
         if weighted_impurity < impurity:
             impurity = weighted_impurity
@@ -110,39 +113,19 @@ def build_dt(dataframe: pd.DataFrame, node, labels, is_numerical, depth, col_nam
     built_tree = DecisionTree(max_depth)
     built_tree.build_tree(dataframe, labels, is_numerical, 1)
 
-  
-
-def get_counts():
-    """
-        getting the counts of the labels in the dataset, then creating a dict
-        with the label with it's count
-    """
-    # create a list of labels without duplicates
-    unique_rows = list(set(self.df.iloc[:,0]))
-
-    # rename dicts
-    dicts = {}
-    
-    for items in unique_rows:
-        # making a list of the counts of the labels, will be the values
-        counts = self.df[items].value_counts()
-        # make dictionary with labels (keys) and their counts (values)
-        dicts[i] = counts
-
-    return dicts
-
 def gini_imp(classes):
     """
         performing gini formula on data set, returning the gini impurity
     """
     # find total number of rows in dataset
     total_outcomes = len(classes)
-    dicts = get_counts()
+    # Maybe should set normalize as True
+    counts = dict(classes.value_counts())
     gini_imp = 1
 
     #perform gini calculation
-    for i in dicts:
-        values = dicts[i]
+    for i in counts:
+        values = counts[i]
         p = values / total_outcomes
         gini = p ** 2
         gini_imp -= gini
@@ -160,8 +143,8 @@ def weighted_gini_impurity(left, right):
     right_gini = gini_imp(right)
 
     # weighted gini impurity
-    weighted_gini = (left_gini * (len(left_gini) / (len(left_gini) + (len(right_gini))))) + \
-                    (right_gini * (len(right_gini) / (len(left_gini) + (len(right_gini)))))
+    weighted_gini = (left_gini * (len(left) / (len(left) + (len(right))))) + \
+                    (right_gini * (len(right) / (len(left) + (len(right)))))
 
     return weighted_gini
 
@@ -173,5 +156,14 @@ if __name__ == "__main__":
     df = df.drop(columns = "labels")
     # user must specifiy the pd.Series for is_numerical and here the slice eliminates the label column of fruits.csv
     is_numerical = pd.Series([False, True], col_names[:2])
-    #print(best_split_df(df, labels, is_numerical))
+    
+    print(best_split_df(df, labels, is_numerical))
+
+    # Original split = ('color', 'Red')
+
+    
+
+    #tree = DecisionTree()
+    #node = tree.build_tree(df, labels, is_numerical)
+    #print(predict(node.feature, df))
  
