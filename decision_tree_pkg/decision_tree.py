@@ -49,8 +49,7 @@ class DecisionTree:
         return Node(feature, threshold, left_node, right_node)
     
     def __eq__(self, other):
-        return self.feature == other.feature and self.threshold == other.threshold and self.left == other.left \
-        and self.right == other.right and self.label == other.label
+        return self.feature == other.feature and self.threshold == other.threshold and self.label == other.label
 
 def predict(node, input_data):
     """ prediction method"""
