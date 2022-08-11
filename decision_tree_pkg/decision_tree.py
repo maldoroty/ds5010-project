@@ -4,6 +4,8 @@ DS5010 Decision Tree Project
 import pandas as pd
 import numpy as np
 
+TREE_SPACE = "   "
+
 class Node:
     """
     Node used to build a decision tree
@@ -35,25 +37,38 @@ class Node:
     
     def __str__(self):
         """
-        Used to print the decision tree
+        Used to print the decision tree 
         """
-        return self.print_helper()
+        
+        return self.print_helper(TREE_SPACE)
         
     
-    def print_helper(self):
+    def print_helper(self, space):
         """
         Helper function to print the decision tree
+
+        ...
+        
+        Attributes
+        ----------
+        space : String
+            spacing that will help with the layout when printing the tree
+
+        ...
+        
+        Returns
+        -------
+        string
+            printed tree with levels of node and leaf shown
         """
-        SPACE = "   "
-        TREE_SPACE = "   "
+        
         if self.label is not None:
             tree = "<Leaf, Label = " + str(self.label) + ">"
         else:
             tree = "<Node, Threshold = " + str(self.threshold)
             tree += ", Features = " + str(self.feature) + ">\n"
-
-            tree += SPACE + self.left.print_helper() + "\n"
-            tree += SPACE + self.right.print_helper()
+            tree += space + self.left.print_helper(space + TREE_SPACE) + "\n"
+            tree += space + self.right.print_helper(space + TREE_SPACE)
 
         return tree
     
@@ -67,7 +82,8 @@ class DecisionTree:
     """
     Decision tree class that uses the nodes and helper functions to build the tree
     """
-    def __init__(self, max_depth = 10):
+    
+    def __init__(self, df, max_depth = 10):
         """
         Initializing the Tree
 
@@ -76,9 +92,21 @@ class DecisionTree:
         Attributes
         ----------
         max_depth : Int
-            The max depth allowed for a tree to be built. 
+            The max depth allowed for a tree to be built.
+        df : Pandas dataframe
+            Dataframe that will be used to train the tree.
         """
         self.max_depth = max_depth
+        self.df = df
+
+        
+    def train(self):
+
+        labels = self.df[self.df.columns[-1]]
+        df_no_classes = self.df.drop(self.df.columns[-1], axis=1)
+        is_numerical = gen_is_numerical(df_no_classes)
+
+        return self.build_tree(df_no_classes, labels, is_numerical)
     
     def build_tree(self, dataframe, labels, is_numerical, depth = 0):
         """
@@ -89,7 +117,7 @@ class DecisionTree:
         Attributes
         ----------
         dataframe : pd.Dataframe
-            Dataframe used fro training the tree
+            Dataframe used for training the tree
         labels : pd.Series
             Series of labels for training data that gives each row a classification
         is_numerical : pd.Series(list, list)
@@ -402,6 +430,9 @@ def gen_is_numerical(df):
     # returns the series with the data type of the columns and ignores last column
     return pd.Series(bool_list, df.columns[:len(df.columns)])
 
+#def train_test_split(df, threshold):
+# working on this function
+    
     
 if __name__ == "__main__":
     # example of how this needs to be set up
@@ -412,23 +443,31 @@ if __name__ == "__main__":
 
     """ Removed '(skiprows=1, header=None, names=col_names)' from the read_csv
         call since all of our data has headers"""
-    df = pd.read_csv("iris.csv") # skiprows=1, header=None, names=col_names)
+    
+        #df = pd.read_csv("iris.csv") # skiprows=1, header=None, names=col_names)
 
     """ Since the last column is always for the labels, we can use the -1
     index to select it """
-    labels = df[df.columns[-1]]
+    
+        #labels = df[df.columns[-1]]
 
     """ Since the last column is always for the labels, we can use the -1
     index to drop it """
-    df = df.drop(df.columns[-1], axis=1)
+    
+        #df = df.drop(df.columns[-1], axis=1)
     
     # user must specifiy the pd.Series for is_numerical and here the slice eliminates the label column of fruits.csv
     #is_numerical = pd.Series([False, True], col_names[:2])
 
-    is_numerical = gen_is_numerical(df)    
+        #is_numerical = gen_is_numerical(df)    
 
-    tree = DecisionTree()
-    node = tree.build_tree(df, labels, is_numerical)
+    df = pd.read_csv("iris.csv")
+
+    # train test split
+
+    
+    tree = DecisionTree(df)
+    node = tree.train()
     print(node)
 
     #print(predict(node, df.iloc[0]))
