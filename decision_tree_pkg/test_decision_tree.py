@@ -50,7 +50,26 @@ class TestDecisionTree(unittest.TestCase):
 
 class TestDecisionTreeFunctions(unittest.TestCase):
 
-    def test_best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
+    def test_best_split_df(self):
+        col_names = ["color", "diameter", "labels"]
+        df = pd.read_csv("fruits.csv",skiprows=1, header=None, names=col_names)
+        labels = df.labels
+        df = df.drop(columns = "labels")
+        is_numerical = pd.Series([False, True], col_names[:2])
+        x = best_split_df(df, labels, is_numerical)
+        self.assertEqual(x, ("color", "Red"))
+
+        col_names2 = ["sepal_length", "sepal_width", "petal_length", "petal_width", "species"]
+        df2 = pd.read_csv("iris.csv", skiprows=1, header=None, names=col_names2)
+        species = df2.species
+        df2 = df2.drop(columns = "species")
+        is_numerical2 = pd.Series([True, True, True, True], col_names2[:4])
+        y = best_split_df(df2, species, is_numerical2)
+        self.assertEqual(y, ("petal_length", 1.9))
+
+        z = best_split_df([], [], [])
+        self.assertEqual(z, (None, None))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=3)

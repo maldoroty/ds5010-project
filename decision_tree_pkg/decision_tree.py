@@ -17,15 +17,13 @@ class Node:
     def __str__(self):
         TREE_SPACE = "   "
         if self.label is not None:
-            tree = "<Leaf, Label = " + self.label + ">"
+            tree = "<Leaf, Label = " + str(self.label) + ">"
         else:
-            tree = "<Node, Threshold = " + self.threshold
-            tree += ", Features = " + self.feature + ">\n"
+            tree = "<Node, Threshold = " + str(self.threshold)
+            tree += ", Features = " + str(self.feature) + ">\n"
 
             tree += TREE_SPACE + TREE_SPACE + self.left.print_tree() + "\n"
             tree += TREE_SPACE + TREE_SPACE + self.right.print_tree()
-
-        return tree
     
     def print_tree(self):
         return self.__str__()
@@ -66,6 +64,7 @@ def predict(node, input_data):
 def best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
     """looping through each column of the dataframe"""
     best_threshold = None
+    col = None
     best_impurity = np.inf
     for col_name in dataframe:
         threshold, impurity = best_split_col(dataframe[col_name], labels, is_numerical[col_name])
@@ -126,13 +125,6 @@ def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
             labels[dataframe[col_name] <= threshold], labels[dataframe[col_name] > threshold]
     return dataframe[dataframe[col_name] == threshold], dataframe[dataframe[col_name] != threshold], \
         labels[dataframe[col_name] == threshold], labels[dataframe[col_name] != threshold]
-
-
-def build_dt(dataframe: pd.DataFrame, node, labels, is_numerical, depth, col_name, threshold):
-    """ building tree"""
-    parent = split(dataframe, col_name, threshold, labels, is_numerical)
-    built_tree = DecisionTree(max_depth)
-    built_tree.build_tree(dataframe, labels, is_numerical, 1)
 
 def gini_imp(classes):
     """
