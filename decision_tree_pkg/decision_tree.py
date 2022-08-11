@@ -163,27 +163,78 @@ def weighted_gini_impurity(left, right):
                     (right_gini * (len(right) / (len(left) + (len(right)))))
 
     return weighted_gini
+
+
+def tree_score(tree, df, labels):
+    """ Measures the accuracy of the decision tree"""
+    
+    count = 0
+
+    # iterating through df
+    for i in range(len(df)):
+
+        # calls predict() function on each row
+        prediction = predict(tree, df.iloc[i])
+
+        # check if prediction is correct, and increase count by 1 if it is
+        if prediction == labels.iloc[i]:
+            count += 1
+
+    # returns the accuracy measurement
+    return count / len(df)
+
+def gen_is_numerical(df):
+    """ Generates ts numerical' series based on the dataframe given"""
+
+    bool_list = []
+    
+    # get first row to see what data types we have, but could've picked any row
+    first_row = df.iloc[0]
+
+    # iterate through the columns of the first row
+    for i in range(len(first_row)):
+        # checking if the columns are numeric or a string and put the
+        # correspoding boolean into a list
+        if isinstance(first_row.iloc[i], str):
+            bool_list.append(False)
+        else:
+            bool_list.append(True)
+
+    # returns the series with the data type of the columns and ignores last column
+    return pd.Series(bool_list, df.columns[:len(df.columns)])
+
     
 if __name__ == "__main__":
     # example of how this needs to be set up
-    col_names = ["color", "diameter", "labels"]
-    df = pd.read_csv("fruits.csv", skiprows=1, header=None, names=col_names)
-    labels = df.labels
-    print(df)
-    df = df.drop(columns = "labels")
+
+    """Removed col_names list so can instead dynamically infer to them
+    using df.columns"""
+    #col_names = ["color", "diameter", "labels"]
+
+    """ Removed '(skiprows=1, header=None, names=col_names)' from the read_csv
+        call since all of our data has headers"""
+    df = pd.read_csv("iris.csv") # skiprows=1, header=None, names=col_names)
+
+    """ Since the last column is always for the labels, we can use the -1
+    index to select it """
+    labels = df[df.columns[-1]]
+
+    """ Since the last column is always for the labels, we can use the -1
+    index to drop it """
+    df = df.drop(df.columns[-1], axis=1)
+    
     # user must specifiy the pd.Series for is_numerical and here the slice eliminates the label column of fruits.csv
-    is_numerical = pd.Series([False, True], col_names[:2])
-    
-    print(best_split_df(df, labels, is_numerical))
+    #is_numerical = pd.Series([False, True], col_names[:2])
 
-    # Original split = ('color', 'Red')
-
-    
+    is_numerical = gen_is_numerical(df)    
 
     tree = DecisionTree()
     node = tree.build_tree(df, labels, is_numerical)
     print(node)
-    # print(predict(node, df))
+
+    #print(predict(node, df.iloc[0]))
+
+    print(tree_score(node, df, labels))
 
     
  
