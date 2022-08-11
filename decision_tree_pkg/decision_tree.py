@@ -24,6 +24,8 @@ class Node:
 
             tree += TREE_SPACE + TREE_SPACE + self.left.print_tree() + "\n"
             tree += TREE_SPACE + TREE_SPACE + self.right.print_tree()
+
+        return tree
     
     def print_tree(self):
         return self.__str__()
