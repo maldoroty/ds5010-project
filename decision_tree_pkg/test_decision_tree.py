@@ -8,6 +8,9 @@ from decision_tree import *
 class TestNode(unittest.TestCase):
     
     def test_node(self):
+        """
+        Testing node attribute retrieval
+        """
         x = Node(feature = None, threshold = None, left = None, right = None, label = None)
         self.assertEqual(None, x.feature)
         self.assertEqual(None, x.threshold)
@@ -23,6 +26,9 @@ class TestNode(unittest.TestCase):
         self.assertEqual("Grape", z.label)
     
     def test_equal(self):
+        """
+        Testing node equality
+        """
         x = Node(feature = None, threshold = None, left = None, right = None, label = None)
         y = Node(feature = "Color", threshold = "Red")
         z = Node(label = "Grape")
@@ -33,6 +39,9 @@ class TestNode(unittest.TestCase):
 class TestDecisionTree(unittest.TestCase):
 
     def test_build_tree(self):
+        """
+        testing the build tree function
+        """
         col_names = ["color", "diameter", "labels"]
         df = pd.read_csv("fruits.csv",skiprows=1, header=None, names=col_names)
         labels = df.labels
@@ -51,6 +60,9 @@ class TestDecisionTree(unittest.TestCase):
 class TestDecisionTreeFunctions(unittest.TestCase):
 
     def test_best_split_df(self):
+        """
+        Test best split
+        """
         col_names = ["color", "diameter", "labels"]
         df = pd.read_csv("fruits.csv",skiprows=1, header=None, names=col_names)
         labels = df.labels
@@ -69,6 +81,34 @@ class TestDecisionTreeFunctions(unittest.TestCase):
 
         z = best_split_df([], [], [])
         self.assertEqual(z, (None, None))
+    
+    def test_gini_imp(self):
+        """
+        Testing gini_impurity of one series
+        """
+        series_1 = pd.Series(["Apple", "Apple", "Apple"])
+        series_2 = pd.Series(["Apple", "Apple", "Grape"])
+        series_3 = pd.Series(["Apple", "Grape"])
+        x = gini_imp(series_1)
+        y = gini_imp(series_2)
+        z = gini_imp(series_3)
+        self.assertAlmostEqual(x, 0.0)
+        self.assertAlmostEqual(y, 1 - ((2/3) ** 2 + (1/3) ** 2))
+        self.assertAlmostEqual(z, 0.5)
+    
+    def test_weighted_gini_imp(self):
+        """
+        Testing weighted gini impurity of two different series
+        """
+        x = series_1 = pd.Series(["Apple", "Apple", "Apple"])
+        y = series_2 = pd.Series(["Apple", "Apple", "Grape"])
+        z = series_3 = pd.Series(["Apple", "Grape"])
+        weight_1 = weighted_gini_impurity(x, y)
+        weight_2 = weighted_gini_impurity(x, z)
+        weight_3 = weighted_gini_impurity(x, pd.Series(["Grape", "Grape"]))
+        self.assertAlmostEqual(weight_1, ((1/2) * 0) + ((1/2) * 0.4444444))
+        self.assertAlmostEqual(weight_2, (3/5) * 0 + (2/5) * 0.5)
+        self.assertAlmostEqual(weight_3, (3/5) * 0 + (2/5) * 0)
 
 
 if __name__ == "__main__":

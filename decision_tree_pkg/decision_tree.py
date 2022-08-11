@@ -255,6 +255,7 @@ def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
     """
     col_names = list(dataframe.columns)
     idx = col_names.index(col_name)
+    # splitting the data and labels based on the column and if it matches the threshold
     if is_numerical[idx]:
         return dataframe[dataframe[col_name] <= threshold], dataframe[dataframe[col_name] > threshold], \
             labels[dataframe[col_name] <= threshold], labels[dataframe[col_name] > threshold]
