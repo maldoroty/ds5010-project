@@ -29,6 +29,9 @@ class Node:
     
     def print_tree(self):
         return self.__str__()
+    
+    def __eq__(self, other):
+        return self.feature == other.feature and self.threshold == other.threshold and self.label == other.label
 
 class DecisionTree:
 
@@ -48,9 +51,6 @@ class DecisionTree:
         right_node = self.build_tree(right, right_labels, is_numerical, depth + 1)
         return Node(feature, threshold, left_node, right_node)
     
-    def __eq__(self, other):
-        return self.feature == other.feature and self.threshold == other.threshold and self.label == other.label
-
 def predict(node, input_data):
     """ prediction method"""
 
