@@ -5,9 +5,28 @@ import pandas as pd
 import numpy as np
 
 class Node:
-    
+    """
+    Node used to build a decision tree
+    """
     def __init__(self, feature = None, threshold = None, left = None, right = None, label = None):
-        '''initializing all the variables needed for a decision node and leaf node'''
+        """
+        Initializing all the features of the node
+
+        ...
+        
+        Attributes
+        ----------
+        feature : String
+            column name where the threshold is picked for best split
+        threshold : Float, Int, or String
+            value used for the best split
+        left : Node
+            left child Node
+        right : Node
+            right child Node
+        label : Float, Int, or String
+            leaf node most common occuring classifier
+        """
         self.feature = feature
         self.threshold = threshold
         self.left = left
@@ -15,10 +34,17 @@ class Node:
         self.label = label
     
     def __str__(self):
-        return self.print_helper("   ")
+        """
+        Used to print the decision tree
+        """
+        return self.print_helper()
         
     
-    def print_helper(self, space):
+    def print_helper(self):
+        """
+        Helper function to print the decision tree
+        """
+        SPACE = "   "
         TREE_SPACE = "   "
         if self.label is not None:
             tree = "<Leaf, Label = " + str(self.label) + ">"
@@ -26,35 +52,90 @@ class Node:
             tree = "<Node, Threshold = " + str(self.threshold)
             tree += ", Features = " + str(self.feature) + ">\n"
 
-            tree += space + self.left.print_helper(space + TREE_SPACE) + "\n"
-            tree += space + self.right.print_helper(space + TREE_SPACE)
+            tree += SPACE + self.left.print_helper() + "\n"
+            tree += SPACE + self.right.print_helper()
 
         return tree
     
     def __eq__(self, other):
+        """
+        Equality for two nodes
+        """
         return self.feature == other.feature and self.threshold == other.threshold and self.label == other.label
 
 class DecisionTree:
-
+    """
+    Decision tree class that uses the nodes and helper functions to build the tree
+    """
     def __init__(self, max_depth = 10):
-        '''initiliazing variables that control the decision tree builder'''
+        """
+        Initializing the Tree
+
+        ...
+        
+        Attributes
+        ----------
+        max_depth : Int
+            The max depth allowed for a tree to be built. 
+        """
         self.max_depth = max_depth
     
     def build_tree(self, dataframe, labels, is_numerical, depth = 0):
-        """building the tree recursively"""
+        """
+        Method to build the decision tree
+
+        ...
+        
+        Attributes
+        ----------
+        dataframe : pd.Dataframe
+            Dataframe used fro training the tree
+        labels : pd.Series
+            Series of labels for training data that gives each row a classification
+        is_numerical : pd.Series(list, list)
+            Series of a tuple of two lists. The first list is a list of booleans telling if the column is numerical or categorical.
+            The second list in the tuple are the column names except for the last (the labels column)
+        
+        ...
+
+        Returns
+        -------
+        Entirely built decision tree object
+        """
+        # base cases to stop building the tree return leaf nodes or None
         if len(dataframe) == 0:
             return None
         if labels.nunique() == 1 or depth >= self.max_depth:
             return Node(label = labels.mode()[0])
+        # finding the best split
         feature, threshold = best_split_df(dataframe, labels, is_numerical)
+        # splitting the dataframe
         left, right, left_labels, right_labels = split(dataframe, feature, threshold, labels, is_numerical)
+        # recursively build the tree adding 1 to the depth
         left_node = self.build_tree(left, left_labels, is_numerical, depth + 1)
         right_node = self.build_tree(right, right_labels, is_numerical, depth + 1)
         return Node(feature, threshold, left_node, right_node)
     
 def predict(node, input_data):
-    """ prediction method"""
+    """
+    Predict the label of a given data set
 
+    ...
+
+    Paramters
+    ---------
+    Node : Node
+        The tree root node
+    input_data : pd.Dataframe
+        Dataframe the user wants to find labels for rows
+    
+    ...
+
+    Returns
+    -------
+    String
+        row predicted label
+    """
     if node.label is not None:
         return node.label
     else:
@@ -65,10 +146,32 @@ def predict(node, input_data):
     
 
 def best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
-    """looping through each column of the dataframe"""
+    """
+    Finding the best split looping over an entire dataframe
+
+    ...
+
+    Paramters
+    ---------
+    dataframe : pd.Dataframe
+        Dataframe used fro training the tree
+    labels : pd.Series
+        Series of labels for training data that gives each row a classification
+    is_numerical : pd.Series(list, list)
+        Series of a tuple of two lists. The first list is a list of booleans telling if the column is numerical or categorical.
+        The second list in the tuple are the column names except for the last (the labels column)
+        
+    ...
+
+    Returns
+    -------
+    tuple -- (string, string/float/int)
+        best column and threshold within that column to split
+    """
     best_threshold = None
     col = None
     best_impurity = np.inf
+    # iteratre through entire dataframe to find best split
     for col_name in dataframe:
         threshold, impurity = best_split_col(dataframe[col_name], labels, is_numerical[col_name])
         # saving lowest impurity
@@ -78,7 +181,28 @@ def best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
     return col, best_threshold
 
 def best_split_col(data: pd.Series, labels: pd.Series, is_numerical: bool):
-    """to find the best split of the column based on the gini_impurity"""
+    """
+    Finding the best split in a column
+
+    ...
+
+    Paramters
+    ---------
+    dataframe : pd.Dataframe
+        Dataframe used fro training the tree
+    labels : pd.Series
+        Series of labels for training data that gives each row a classification
+    is_numerical : pd.Series(list, list)
+        Series of a tuple of two lists. The first list is a list of booleans telling if the column is numerical or categorical.
+        The second list in the tuple are the column names except for the last (the labels column)
+        
+    ...
+
+    Returns
+    -------
+    tuple -- float/int/string, float
+        best threshold value in the column and the impurity of the split
+    """
     # getting relative frequences of each unique values
     unique_features = data.value_counts(normalize = True)
     impurity = np.inf
@@ -93,13 +217,6 @@ def best_split_col(data: pd.Series, labels: pd.Series, is_numerical: bool):
             left_labels = labels[data <= value]
             right_labels = labels[data > value]
         # calculate left and right impurity
-        
-        #left_impurity = gini_impurity_pd(left_labels)
-        
-        #right_impurity = gini_impurity_pd(right_labels)
-        
-        # calculate weighted impurity
-        #weighted_impurity = count * left_impurity + (1 - count) * right_impurity
 
         weighted_impurity = weighted_gini_impurity(left_labels, right_labels)
         
@@ -109,18 +226,33 @@ def best_split_col(data: pd.Series, labels: pd.Series, is_numerical: bool):
             threshold = value
     return threshold, impurity
 
-
-def gini_impurity_pd(label_subsets: pd.Series) -> float:
-    '''fine gini impurity'''
-    # get the relative frequencies of the label_subsets
-    label_subsets = label_subsets.value_counts(normalize = True)
-    # calculate gini impurity
-    squared_freq = label_subsets ** 2
-    sum_freq = sum(squared_freq)
-    return 1 - sum_freq
-
 def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
-    '''split the dataframe based on the threshold in a column'''
+    """
+    Splitting the dataframe at the best column and threshold
+
+    ...
+
+    Paramters
+    ---------
+    dataframe : pd.Dataframe
+        Dataframe being split
+    col_name : pd.Series
+        name of the column used for the split
+    threshold : Float, int, or string
+        threshold value split at
+    labels : pd.Series
+        Series of labels for training data that gives each row a classification
+    is_numerical : pd.Series(list, list)
+        Series of a tuple of two lists. The first list is a list of booleans telling if the column is numerical or categorical.
+        The second list in the tuple are the column names except for the last (the labels column)
+        
+    ...
+
+    Returns
+    -------
+    pd.Dataframe
+        two split dataframes that match the threshold or do not and splits the labels series accordinly 
+    """
     col_names = list(dataframe.columns)
     idx = col_names.index(col_name)
     if is_numerical[idx]:
@@ -131,7 +263,21 @@ def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
 
 def gini_imp(classes):
     """
-        performing gini formula on data set, returning the gini impurity
+    Calculating the gini impurity for a node
+
+    ...
+
+    Paramters
+    ---------
+    classes : pd.Series
+        Series of data used to calculate the gini impurity
+
+    ...
+
+    Returns
+    -------
+    float
+        gini impurity
     """
     # find total number of rows in dataset
     total_outcomes = len(classes)
@@ -150,7 +296,23 @@ def gini_imp(classes):
 
 def weighted_gini_impurity(left, right):
     """
-        finding weighted gini value, returning the weighted gini impurity
+    Calculating the weighted gini impurity of the left and right node split
+
+    ...
+
+    Paramters
+    ---------
+    left : Node
+        left gini impurity
+    right : Node
+        right gini impurity
+
+    ...
+
+    Returns
+    -------
+    float
+        weighted gini impurity
     """
     #gini from left node
     left_gini = gini_imp(left)
@@ -166,7 +328,27 @@ def weighted_gini_impurity(left, right):
 
 
 def tree_score(tree, df, labels):
-    """ Measures the accuracy of the decision tree"""
+    """
+    Measures the accuracy of the decision tree
+
+    ...
+
+    Paramters
+    ---------
+    tree : DecisionTree
+        Decision Tree that was built to classify data
+    df : pd.Dataframe
+        Dataframe used to build the decision tree
+    labels : pd.Series
+        the column of labels used to classify
+
+    ...
+
+    Returns
+    -------
+    float
+        the accuracy of the tree
+    """
     
     count = 0
 
@@ -184,7 +366,23 @@ def tree_score(tree, df, labels):
     return count / len(df)
 
 def gen_is_numerical(df):
-    """ Generates ts numerical' series based on the dataframe given"""
+    """ 
+    Generates ts numerical' series based on the dataframe given
+    
+    ...
+
+    Paramters
+    ---------
+    df : pd.Dataframe
+        training dataframe given
+
+    ...
+
+    Returns
+    -------
+    pd.Series
+        tuple with a list of booleans and the column names without the labels column
+    """
 
     bool_list = []
     
