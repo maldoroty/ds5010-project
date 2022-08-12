@@ -3,6 +3,7 @@ DS5010 Decision Tree Project
 '''
 import pandas as pd
 import numpy as np
+import random
 
 TREE_SPACE = "   "
 
@@ -101,7 +102,9 @@ class DecisionTree:
 
         
     def train(self):
-
+        if len(self.df) == 0:
+            return None
+        
         labels = self.df[self.df.columns[-1]]
         df_no_classes = self.df.drop(self.df.columns[-1], axis=1)
         is_numerical = gen_is_numerical(df_no_classes)
@@ -167,10 +170,16 @@ def predict(node, input_data):
     if node.label is not None:
         return node.label
     else:
-        if input_data.loc[node.feature] < node.threshold:
-            return predict(node.left, input_data)
+        if isinstance(node.threshold, str):
+            if input_data.loc[node.feature] != node.threshold:
+                return predict(node.left, input_data)
+            else:
+                return predict(node.right, input_data)
         else:
-            return predict(node.right, input_data)
+            if input_data.loc[node.feature] < node.threshold:
+                return predict(node.left, input_data)
+            else:
+                return predict(node.right, input_data)
     
 
 def best_split_df(dataframe: pd.DataFrame, labels, is_numerical: pd.Series):
@@ -394,6 +403,7 @@ def tree_score(tree, df, labels):
     # returns the accuracy measurement
     return count / len(df)
 
+
 def gen_is_numerical(df):
     """ 
     Generates ts numerical' series based on the dataframe given
@@ -430,49 +440,67 @@ def gen_is_numerical(df):
     # returns the series with the data type of the columns and ignores last column
     return pd.Series(bool_list, df.columns[:len(df.columns)])
 
-#def train_test_split(df, threshold):
-# working on this function
-    
+
+def train_test_split(df, train_size, random_seed=None):
+    """ Returns a training dataframe, a test data dataframe, and a test classes dataframes"""
+
+    if random_seed is not None:
+        random.seed(random_seed)
+
+    # First, we get the number of rows we want for our training set
+    num_train_rows = int(len(df) * train_size)
+
+    # Put all the possible indices of the dataframe in a list. This list helps us keep
+    # track of which indices are used and which ones are left.
+    possible_idxs = [idx for idx in range(len(df))]
+
+    Xy_train = pd.DataFrame(columns=df.columns)
+    Xy_test = pd.DataFrame(columns=df.columns)
+
+    for idx in range(num_train_rows):
+        # Generate a random index for the possible_idxs list
+        rand_idx = random.randint(0, len(possible_idxs) - 1)
+
+        # We use that random index for possible_idxs to get a random index of the dataframe
+        Xy_train.loc[idx] = df.iloc[possible_idxs[rand_idx]]
+
+        # Remove that index from the list since we've used it
+        del possible_idxs[rand_idx]
+
+
+    # Now, we'll fill up the Xy_test dataframe by zipping the index for the Xy_test
+    # dataframe and the remaining indexes of the df dataframe.
+    for test_idx, df_idx in zip(range(len(possible_idxs)), possible_idxs):
+        Xy_test.loc[test_idx] = df.iloc[df_idx]
+
+
+    # Drop the classes column
+    X_test = Xy_test.drop(Xy_test.columns[-1], axis=1)
+
+
+    # Extract only the class column
+    y_test = Xy_test[Xy_test.columns[-1]]
+
+    return Xy_train, X_test, y_test    
     
 if __name__ == "__main__":
-    # example of how this needs to be set up
 
-    """Removed col_names list so can instead dynamically infer to them
-    using df.columns"""
-    #col_names = ["color", "diameter", "labels"]
-
-    """ Removed '(skiprows=1, header=None, names=col_names)' from the read_csv
-        call since all of our data has headers"""
-    
-        #df = pd.read_csv("iris.csv") # skiprows=1, header=None, names=col_names)
-
-    """ Since the last column is always for the labels, we can use the -1
-    index to select it """
-    
-        #labels = df[df.columns[-1]]
-
-    """ Since the last column is always for the labels, we can use the -1
-    index to drop it """
-    
-        #df = df.drop(df.columns[-1], axis=1)
-    
-    # user must specifiy the pd.Series for is_numerical and here the slice eliminates the label column of fruits.csv
-    #is_numerical = pd.Series([False, True], col_names[:2])
-
-        #is_numerical = gen_is_numerical(df)    
+    columns = ["sex", "length", "diameter", "height", "whole_weight", "shucked_weight", "viscera_weight", "shell_weight", "rings"]
 
     df = pd.read_csv("iris.csv")
 
-    # train test split
+    # df.columns = columns
 
-    
-    tree = DecisionTree(df)
+    Xy_train, X_test, y_test = train_test_split(df=df, train_size=0.50)
+
+    print("Xy_train = \n", Xy_train)
+    print("X_test = \n", X_test)
+    print("y_test = \n", y_test)
+
+    tree = DecisionTree(Xy_train)
     node = tree.train()
     print(node)
 
-    #print(predict(node, df.iloc[0]))
-
-    print(tree_score(node, df, labels))
-
+    print(tree_score(node, X_test, y_test))  
     
  
