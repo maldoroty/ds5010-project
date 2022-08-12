@@ -171,12 +171,12 @@ def predict(node, input_data):
         return node.label
     else:
         if isinstance(node.threshold, str):
-            if input_data.loc[node.feature] != node.threshold:
+            if input_data.loc[node.feature] == node.threshold:
                 return predict(node.left, input_data)
             else:
                 return predict(node.right, input_data)
         else:
-            if input_data.loc[node.feature] < node.threshold:
+            if input_data.loc[node.feature] <= node.threshold:
                 return predict(node.left, input_data)
             else:
                 return predict(node.right, input_data)
