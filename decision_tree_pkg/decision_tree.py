@@ -102,6 +102,21 @@ class DecisionTree:
 
         
     def train(self):
+        """
+        Method to prepare the data and start the process to give to the decision tree
+
+        ...
+        
+        Attributes
+        ----------
+        None
+        
+        ...
+
+        Returns
+        -------
+        Produces a fully built decision tree
+        """
         if len(self.df) == 0:
             return None
         
@@ -442,7 +457,27 @@ def gen_is_numerical(df):
 
 
 def train_test_split(df, train_size, random_seed=None):
-    """ Returns a training dataframe, a test data dataframe, and a test classes dataframes"""
+    """
+    Returns a training dataframe, a test data dataframe, and a test classes dataframes
+
+    ...
+    
+    Attributes
+    ----------
+    train_size : Float
+        Percent of rows that will used to train the decision tree
+    random_seed : Int
+        Randomly generated number that will be the row that will be chosen
+        to get trained
+    
+    ...
+
+    Returns
+    -------
+    Dataframe, Dataframe, Series
+        Xy_train, which is the classes and data combined in a dataset, x_test,
+        which are the node features, and y_test, which are the node labels
+    """
 
     if random_seed is not None:
         random.seed(random_seed)
