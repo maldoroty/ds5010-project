@@ -1,9 +1,8 @@
-import unittest
-
 """
 This file is for setting up and running the tests for this package.
 """
 
+import unittest
 from decision_tree_pkg.tests import test_decision_tree
 
 # Intializing the test suite
@@ -18,10 +17,3 @@ runner = unittest.TextTestRunner(verbosity=3)
 
 # Now, we'll run our tests
 result = runner.run(suite)
-
-
-
-
-
-
-
