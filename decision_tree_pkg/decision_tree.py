@@ -121,10 +121,10 @@ class DecisionTree:
             return None
         
         labels = self.df[self.df.columns[-1]]
-        df_no_classes = self.df.drop(self.df.columns[-1], axis=1)
-        is_numerical = gen_is_numerical(df_no_classes)
+        df_no_labels = self.df.drop(self.df.columns[-1], axis=1)
+        is_numerical = gen_is_numerical(df_no_labels)
 
-        return self.build_tree(df_no_classes, labels, is_numerical)
+        return self.build_tree(df_no_labels, labels, is_numerical)
     
     def build_tree(self, dataframe, labels, is_numerical, depth = 0):
         """
@@ -186,11 +186,13 @@ def predict(node, input_data):
         return node.label
     else:
         if isinstance(node.threshold, str):
+            # Comparison if this node splits on a string value
             if input_data.loc[node.feature] == node.threshold:
                 return predict(node.left, input_data)
             else:
                 return predict(node.right, input_data)
         else:
+            # Comparison if this node splits on a number value
             if input_data.loc[node.feature] <= node.threshold:
                 return predict(node.left, input_data)
             else:
@@ -280,7 +282,7 @@ def best_split_col(data: pd.Series, labels: pd.Series, is_numerical: bool):
 
 def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
     """
-    Splitting the dataframe at the best column and threshold
+    Splitting the dataframe at the given column and threshold
 
     ...
 
@@ -316,14 +318,15 @@ def split(dataframe: pd.DataFrame, col_name, threshold, labels, is_numerical):
 
 def gini_imp(classes):
     """
-    Calculating the gini impurity for a node
+    Calculating the gini impurity for a given set of data
 
     ...
 
     Paramters
     ---------
     classes : pd.Series
-        Series of data used to calculate the gini impurity
+        Series of data used to calculate the gini impurity. Contains only classes since we only need classes
+        when calculating the gini impurity of a set of data.
 
     ...
 
@@ -421,7 +424,10 @@ def tree_score(tree, df, labels):
 
 def gen_is_numerical(df):
     """ 
-    Generates ts numerical' series based on the dataframe given
+    Generates an 'is-numerical' series based on the dataframe given.
+
+    An 'is-numerical' series is a series that has a True or False value for whether a given
+    column is numeric or not.
     
     ...
 
@@ -458,7 +464,9 @@ def gen_is_numerical(df):
 
 def train_test_split(df, train_size, random_seed=None):
     """
-    Returns a training dataframe, a test data dataframe, and a test classes dataframes
+    Returns a training dataframe, a test data dataframe, and a test classes dataframes.
+    This is used for randomly splitting the training and testing dataset in order achieve
+    good results.
 
     ...
     
@@ -482,10 +490,10 @@ def train_test_split(df, train_size, random_seed=None):
     if random_seed is not None:
         random.seed(random_seed)
 
-    # First, we get the number of rows we want for our training set
+    # First, get the number of rows we want for our training set
     num_train_rows = int(len(df) * train_size)
 
-    # Put all the possible indices of the dataframe in a list. This list helps us keep
+    # Put all the possible indices of the dataframe in a list. This list helps keep
     # track of which indices are used and which ones are left.
     possible_idxs = [idx for idx in range(len(df))]
 
@@ -496,46 +504,22 @@ def train_test_split(df, train_size, random_seed=None):
         # Generate a random index for the possible_idxs list
         rand_idx = random.randint(0, len(possible_idxs) - 1)
 
-        # We use that random index for possible_idxs to get a random index of the dataframe
+        # Use that random index for possible_idxs to get a random index of the dataframe
         Xy_train.loc[idx] = df.iloc[possible_idxs[rand_idx]]
 
-        # Remove that index from the list since we've used it
+        # Remove the element at that index from the list since it has been used
         del possible_idxs[rand_idx]
 
-
-    # Now, we'll fill up the Xy_test dataframe by zipping the index for the Xy_test
+    # Now, let's fill up the Xy_test dataframe by zipping the index for the Xy_test
     # dataframe and the remaining indexes of the df dataframe.
     for test_idx, df_idx in zip(range(len(possible_idxs)), possible_idxs):
         Xy_test.loc[test_idx] = df.iloc[df_idx]
 
-
     # Drop the classes column
     X_test = Xy_test.drop(Xy_test.columns[-1], axis=1)
 
-
-    # Extract only the class column
+    # Extract only the class column as a Series
     y_test = Xy_test[Xy_test.columns[-1]]
 
     return Xy_train, X_test, y_test    
-    
-if __name__ == "__main__":
-
-    columns = ["sex", "length", "diameter", "height", "whole_weight", "shucked_weight", "viscera_weight", "shell_weight", "rings"]
-
-    df = pd.read_csv("iris.csv")
-
-    # df.columns = columns
-
-    Xy_train, X_test, y_test = train_test_split(df=df, train_size=0.50)
-
-    print("Xy_train = \n", Xy_train)
-    print("X_test = \n", X_test)
-    print("y_test = \n", y_test)
-
-    tree = DecisionTree(Xy_train)
-    node = tree.train()
-    print(node)
-
-    print(tree_score(node, X_test, y_test))  
-    
  

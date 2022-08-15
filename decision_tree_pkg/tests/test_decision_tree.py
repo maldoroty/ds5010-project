@@ -3,7 +3,7 @@ Unit testing file for decision_tree
 """
 
 import unittest
-from decision_tree import *
+from ..decision_tree import *
 
 class TestNode(unittest.TestCase):
     
@@ -58,6 +58,9 @@ class TestDecisionTree(unittest.TestCase):
         self.assertEqual(y, None)
 
     def test_train(self):
+        """
+        Testing the train function
+        """
         df = pd.read_csv("fruits.csv")
         tree_with_nodes = DecisionTree(df).train()
         self.assertEqual(tree_with_nodes, Node(feature = "color", threshold = "Red", label = None))
@@ -146,8 +149,8 @@ class TestDecisionTreeFunctions(unittest.TestCase):
 
         # String data
         str_node = Node(feature=0, threshold="blue", left=left_leaf, right=right_leaf)
-        left_pred_str = predict(str_node, pd.Series(["red"]))
-        right_pred_str = predict(str_node, pd.Series(["blue"]))
+        left_pred_str = predict(str_node, pd.Series(["blue"]))
+        right_pred_str = predict(str_node, pd.Series(["red"]))
         self.assertEqual(left_pred_str, "left")
         self.assertEqual(right_pred_str, "right")
 
@@ -214,7 +217,7 @@ class TestDecisionTreeFunctions(unittest.TestCase):
 
         score = tree_score(tree, X_test, y_test)
 
-        self.assertAlmostEqual(score, 0.92105263)
+        self.assertAlmostEqual(score, 0.89473684)
 
 
         
@@ -254,10 +257,3 @@ class TestDecisionTreeFunctions(unittest.TestCase):
         self.assertEqual(Xy_train.sort_index(inplace=True), expected_Xy_train.sort_index(inplace=True))
         self.assertEqual(X_test.sort_index(inplace=True), expected_X_test.sort_index(inplace=True))
         self.assertEqual(y_test.sort_index(inplace=True), expected_y_test.sort_index(inplace=True))
-
-
-    
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=3)
